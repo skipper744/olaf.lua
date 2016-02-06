@@ -47,7 +47,7 @@ function kao:__init()
 	ToUpdate.CallbackError = function(NewVersion) print("<font color=\"##7D26CD\"><b>Olaf - the S74 </b></font> <font color=\"#FFFFFF\">Error while Downloading. Please try again.</b></font>") end
 	ScriptUpdate(VERSION, true, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
 	
-	self.Q = {Range = 1000, Width = 30, Delay = 0.25, Speed = 1600, IsReady = function() return myHero:CanUseSpell(_Q) == READY end}
+	self.Q = {Range = 1000, Width = 90, Delay = 0.25, Speed = 1600, IsReady = function() return myHero:CanUseSpell(_Q) == READY end}
 	self.W = {Range = 200, IsReady = function() return myHero:CanUseSpell(_W) == READY end}
 	self.E = {Range = 325, IsReady = function() return myHero:CanUseSpell(_E) == READY end}
 	self.R = {IsReady = function() return myHero:CanUseSpell(_R) == READY end}
@@ -156,10 +156,6 @@ function kao:LoadMenu()
 			self.Config.AutoC:addParam("CatchFrom", "Auto axe catch range to :", SCRIPT_PARAM_LIST, 1, {"Mouse", "my Hero"})
 			--self.Config.AutoC:addParam("Tower", "auto axe catch in tower", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("G"))
 		
-		self.Config:addSubMenu(myHero.charName.." - Auto R Settings", "AutoR")
-			self.Config.AutoR:addParam("Enable", "auto R enable", SCRIPT_PARAM_ONOFF, true)
-			self.Config.AutoR:addParam("stun", "auto r when stun my hero", SCRIPT_PARAM_ONOFF, true)
-		
 		self.Config:addSubMenu(myHero.charName.." - Draw Settings", "Draw")
 			self.Config.Draw:addParam("DrawQ", "Draw Q Range", SCRIPT_PARAM_ONOFF, true)
 			self.Config.Draw:addParam("DrawQColor", "Draw Q Color", SCRIPT_PARAM_COLOR, {100, 255, 0, 0})
@@ -176,16 +172,6 @@ function kao:LoadMenu()
 	AddDrawCallback(function() self:Draw() end)
 	AddAnimationCallback(function(unit, animation) self:OnAnimation(unit, animation) end)
 	AddApplyBuffCallback(function(unit,sorce,buff) self:OnApplyBuff(unit,sorce,buff) end)
-end
-local BuffTypes = {
-    [5] = true, --stun
-}
-function kao:OnApplyBuff(unit,sorce,buff)
-	if not unit.isMe and sorce.isMe and BuffTypes[buff.type] then
-		self.boostbuffname=buff.name
-		self.boostbufftype=buff.type
-		self.boostbufftime=os.clock()		
-	end	
 end
 function kao:OnAnimation(unit, anim)
 	if unit.isMe then
@@ -231,7 +217,6 @@ function kao:Tick()
 		self.comboQMaxRange = self.Config.Combo.QMaxRange
 		self.harassQMaxRange = self.Config.Harass.QMaxRange
 		self.QextraRange = self.Config.Skill.Q.extraRange
-		self:autor()
 		if self.Config.General.OnOrbWalkerKey then
 			if self.Config.General.Combo then
 				self:Combo(self.Target)
@@ -264,11 +249,7 @@ function kao:Tick()
 		end
 	end
 end
-function kao:autor()
-	if self.R.IsReady() and self.Config.AutoR.Enable and self.boostbufftype then
-		CastSpell(_R)
-	end
-end
+
 function kao:DoCatch(Pos)
 	if self.Config.AutoC.CatchFrom == 1 then
 		return GetDistance(Pos, mousePos) < self.Config.AutoC.CatchRange
